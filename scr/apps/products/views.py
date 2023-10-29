@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Product, Category
-from .serializers import ProductSerializer, CategorySerializer
+from .models import Product, Category, ProductCart
+from .serializers import ProductSerializer, CategorySerializer, ProductCartSerializer
 
 from django.utils import timezone
 
@@ -81,3 +81,10 @@ def category_detail_api_view(request, id):
     elif request.method == "DELETE":
         queryset.delete()
         return Response(status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def product_cart_list_api_view(request):
+    user_cart = ProductCart.objects.filter(user=request.user)
+    serializer = ProductCartSerializer(user_cart, context={"request": request}, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Product, Category
+from .models import Product, Category, ProductCart
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -19,3 +19,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def get_product_count(self, obj):
         return obj.product.count()
+
+
+class ProductCartSerializer(serializers.ModelSerializer):
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductCart
+        fields = '__all__'
+
+    def get_total_price(self, obj):
+        total_price = obj.quantity * obj.product.price
+        return total_price

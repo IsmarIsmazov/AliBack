@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Product, Category
+from .models import Product, Category, ProductCart
 
 
 @admin.register(Category)
@@ -24,3 +24,7 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'updated')
     list_per_page = 20
     ordering = ('-created',)
+
+@admin.register(ProductCart)
+class ProductCartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'quantity', 'created_at')
