@@ -25,6 +25,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 20
     ordering = ('-created',)
 
+
 @admin.register(ProductCart)
 class ProductCartAdmin(admin.ModelAdmin):
     list_display = ('user', 'product', 'quantity', 'created_at')

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .models import Product, Category, ProductCart
 from .permissions import IsOwnerOrReadOnly
-from .serializers import ProductSerializer, CategorySerializer, ProductCartSerializer
+from .serializers import ProductListSerializer, CategorySerializer, ProductCartSerializer, ProductDetailSerializer
 
 from django.utils import timezone
 
@@ -16,7 +16,7 @@ def new_products_api_view(request):
 
     new_products = Product.objects.filter(created__gte=midnight).order_by('created')
 
-    serializer = ProductSerializer(new_products, context={"request": request}, many=True)
+    serializer = ProductListSerializer(new_products, context={"request": request}, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -25,14 +25,17 @@ def new_products_api_view(request):
 def product_list_api_view(request):
     if request.method == 'GET':
         queryset = Product.objects.all()
-        serializer = ProductSerializer(queryset, context={"request": request}, many=True)
+        serializer = ProductListSerializer(queryset, context={"request": request}, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
+        serializer = ProductListSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -43,13 +46,15 @@ def product_detail_api_view(request, id):
     except Product.DoesNotExist:
         return Response(status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-        serializer = ProductSerializer(queryset)
+        serializer = ProductDetailSerializer(queryset)
         return Response(serializer.data, status.HTTP_200_OK)
     elif request.method == "PUT":
-        serializer = ProductSerializer(queryset, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_200_OK)
+        serializer = ProductDetailSerializer(queryset, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == "DELETE":
         queryset.delete()
         return Response(status.HTTP_204_NO_CONTENT)
@@ -62,7 +67,7 @@ def category_list_api_view(request):
     return Response(serializer.data, status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def product_cart_list_api_view(request):
     if request.method == 'GET':
@@ -71,9 +76,11 @@ def product_cart_list_api_view(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         serializer = ProductSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -88,9 +95,11 @@ def product_cart_detail_view(request, id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         serializer = ProductCartSerializer(queryset, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

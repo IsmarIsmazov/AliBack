@@ -3,11 +3,16 @@ from rest_framework import serializers
 from .models import Product, Category, ProductCart
 
 
-class ProductSerializer(serializers.ModelSerializer):
-
+class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = ('id', 'title', 'image', 'price', 'in_stock')
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,7 +20,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = '__all__'
 
     def get_product_count(self, obj):
         return obj.product.count()

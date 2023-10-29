@@ -18,7 +18,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='product',
                                  verbose_name='Категория')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_creator',
-                                   verbose_name='Создано пользователем')
+                             verbose_name='Создано пользователем')
     title = models.CharField(max_length=255, verbose_name='Название продукта')
     author = models.CharField(max_length=255, default='admin', verbose_name='Автор')
     image = models.ImageField(upload_to='', verbose_name='Изображение')
@@ -36,6 +36,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class ProductCart(models.Model):
     quantity = models.PositiveIntegerField(default=1)

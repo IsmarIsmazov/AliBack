@@ -12,4 +12,3 @@ urlpatterns = [
     path('products/product_cart/<int:id>/', product_cart_detail_view)
 
 ]
-
