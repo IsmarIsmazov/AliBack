@@ -17,11 +17,11 @@ class Category(models.Model):
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='product',
                                  verbose_name='Категория')
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_creator',
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_creator',
                                    verbose_name='Создано пользователем')
     title = models.CharField(max_length=255, verbose_name='Название продукта')
     author = models.CharField(max_length=255, default='admin', verbose_name='Автор')
-    image = models.ImageField(upload_to='images/', verbose_name='Изображение')
+    image = models.ImageField(upload_to='', verbose_name='Изображение')
     slug = models.SlugField(max_length=255, verbose_name='Слаг')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
     in_stock = models.BooleanField(default=True, verbose_name='В наличии')
