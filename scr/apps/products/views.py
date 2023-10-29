@@ -51,36 +51,11 @@ def product_detail_api_view(request, id):
         return Response(status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def category_list_api_view(request):
-    if request.method == "GET":
-        queryset = Category.objects.all()
-        serializer = CategorySerializer(queryset, context={"request": request}, many=True)
-        return Response(serializer.data, status.HTTP_200_OK)
-    elif request.method == "POST":
-        serializer = CategorySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def category_detail_api_view(request, id):
-    try:
-        queryset = Category.objects.get(id=id)
-    except Category.DoesNotExist:
-        return Response(status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        serializer = CategorySerializer(queryset)
-        return Response(serializer.data, status.HTTP_200_OK)
-    elif request.method == "PUT":
-        serializer = CategorySerializer(queryset, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status.HTTP_200_OK)
-    elif request.method == "DELETE":
-        queryset.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+    categories = Category.objects.all()
+    serializer = CategorySerializer(categories, many=True)
+    return Response(serializer.data, status=200)
 
 
 @api_view(['GET'])
