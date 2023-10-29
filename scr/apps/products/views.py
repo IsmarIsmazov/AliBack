@@ -85,6 +85,6 @@ def category_detail_api_view(request, id):
 
 @api_view(['GET'])
 def product_cart_list_api_view(request):
-    user_cart = ProductCart.objects.filter(user=request.user)
-    serializer = ProductCartSerializer(user_cart, context={"request": request}, many=True)
+    product_cart = ProductCart.objects.filter(user=request.user)
+    serializer = ProductCartSerializer(product_cart, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
