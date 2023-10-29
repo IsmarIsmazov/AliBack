@@ -13,9 +13,7 @@ from django.utils import timezone
 @api_view(['GET'])
 def new_products_api_view(request):
     midnight = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
-
     new_products = Product.objects.filter(created__gte=midnight).order_by('created')
-
     serializer = ProductListSerializer(new_products, context={"request": request}, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
