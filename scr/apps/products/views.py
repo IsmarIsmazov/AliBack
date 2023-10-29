@@ -73,7 +73,7 @@ def product_cart_list_api_view(request):
         serializer = ProductCartSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
+        serializer = ProductCartSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
