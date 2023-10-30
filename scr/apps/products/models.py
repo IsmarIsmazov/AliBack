@@ -20,7 +20,6 @@ class Product(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_creator',
                              verbose_name='Создано пользователем')
     title = models.CharField(max_length=255, verbose_name='Название продукта')
-    author = models.CharField(max_length=255, default='admin', verbose_name='Автор')
     image = models.ImageField(upload_to='', verbose_name='Изображение')
     slug = models.SlugField(max_length=255, verbose_name='Слаг')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена')
@@ -39,10 +38,10 @@ class Product(models.Model):
 
 
 class ProductCart(models.Model):
-    quantity = models.PositiveIntegerField(default=1)
-    created_at = models.DateTimeField(auto_now_add=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1, verbose_name='Количество')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Продукт')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
 
     class Meta:
         verbose_name = "Корзина"
