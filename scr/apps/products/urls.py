@@ -4,11 +4,11 @@ from .views import product_list_api_view, product_detail_api_view, category_list
     new_products_api_view, product_cart_list_api_view, product_cart_detail_view
 
 urlpatterns = [
-    path('products/categories/', category_list_api_view),
-    path('products/products/', product_list_api_view),
-    path('products/products/<int:id>/', product_detail_api_view),
-    path('products/new-products/', new_products_api_view),
-    path('products/product_cart/', product_cart_list_api_view),
-    path('products/product_cart/<int:id>/', product_cart_detail_view)
+    path('categories/', category_list_api_view),
+    path('', product_list_api_view),
+    path('<int:id>/', product_detail_api_view),
+    path('new-products/', new_products_api_view),
+    path('product_cart/', product_cart_list_api_view),
+    path('product_cart/<int:id>/', product_cart_detail_view)
 
 ]
