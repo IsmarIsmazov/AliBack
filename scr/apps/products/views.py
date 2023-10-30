@@ -2,12 +2,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from django.utils import timezone
 
 from .models import Product, Category, ProductCart
 from .permissions import IsOwnerOrReadOnly
 from .serializers import ProductListSerializer, CategorySerializer, ProductCartSerializer, ProductDetailSerializer
-
-from django.utils import timezone
+from .filters import ProductFilter, CategoryFilter
 
 
 @api_view(['GET'])
@@ -23,7 +23,15 @@ def new_products_api_view(request):
 def product_list_api_view(request):
     if request.method == 'GET':
         queryset = Product.objects.all()
-        serializer = ProductListSerializer(queryset, context={"request": request}, many=True)
+        product_filters = ProductFilter(request.GET, queryset=queryset)
+        filtered_product = product_filters.qs
+        sort_by_price = request.query_params.get('price', None)
+
+        if sort_by_price == 'min':
+            filtered_product = filtered_product.order_by('price')
+        elif sort_by_price == 'max':
+            filtered_product = filtered_product.order_by('-price')
+        serializer = ProductListSerializer(filtered_product, context={"request": request}, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
     elif request.method == 'POST':
