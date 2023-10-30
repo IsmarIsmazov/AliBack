@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 from .manager import UserManager
 
@@ -8,6 +9,8 @@ from .manager import UserManager
 class User(AbstractUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, unique=True)
     last_name = models.CharField(max_length=100, unique=True)
+    phone_number = PhoneNumberField(blank=True)
+    avatar_photo = models.ImageField(null=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=100)
 
@@ -17,8 +20,8 @@ class User(AbstractUser, PermissionsMixin):
     REQUIRED_FIELDS = ['first_name', 'last_name', 'password']
 
     def __str__(self):
-        return self.email
+        return f"{self.email} - username: {self.first_name}"
 
     class Meta:
         app_label = 'users'
-        verbose_name = 'пользовтели'
+        verbose_name = 'User'

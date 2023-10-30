@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'apps.users',
+    'phonenumber_field'
 ]
 AUTH_USER_MODEL = 'users.User'
 
