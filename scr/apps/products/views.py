@@ -1,42 +1,103 @@
-from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from .models import Product, Category
-from .serializers import ProductListSerializer, CategorySerializer, ProductDetailSerializer
+from .models import Product, Category, ProductCart
+from .permissions import IsOwnerOrReadOnly
+from .serializers import ProductListSerializer, CategorySerializer, ProductCartSerializer, ProductDetailSerializer
+
+from django.utils import timezone
 
 
-# Create your views here.
+@api_view(['GET'])
+def new_products_api_view(request):
+    midnight = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
+    new_products = Product.objects.filter(created__gte=midnight).order_by('created')
+    serializer = ProductListSerializer(new_products, context={"request": request}, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET', 'POST'])
-def productsViewList(request):
+@permission_classes([IsAuthenticatedOrReadOnly])
+def product_list_api_view(request):
     if request.method == 'GET':
-        product = Product.objects.all()
-        serializer = ProductListSerializer(product,context={'request': request}, many=True).data
-        return Response(data=serializer)
+        queryset = Product.objects.all()
+        serializer = ProductListSerializer(queryset, context={"request": request}, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
     elif request.method == 'POST':
-        serializer = ProductDetailSerializer(request.data)
+        serializer = ProductListSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def productDetail(request, pk):
+@permission_classes([IsOwnerOrReadOnly])
+def product_detail_api_view(request, id):
     try:
-        product = Product.objects.get(pk=pk)
+        queryset = Product.objects.get(id=id)
     except Product.DoesNotExist:
+        return Response(status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        serializer = ProductDetailSerializer(queryset)
+        return Response(serializer.data, status.HTTP_200_OK)
+    elif request.method == "PUT":
+        serializer = ProductDetailSerializer(queryset, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        queryset.delete()
+        return Response(status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def category_list_api_view(request):
+    queryset = Category.objects.all()
+    serializer = CategorySerializer(queryset, many=True)
+    return Response(serializer.data, status.HTTP_200_OK)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def product_cart_list_api_view(request):
+    if request.method == 'GET':
+        queryset = ProductCart.objects.filter(user=request.user)
+        serializer = ProductCartSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        serializer = ProductCartSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsOwnerOrReadOnly])
+def product_cart_detail_view(request, id):
+    try:
+        queryset = ProductCart.objects.get(id=id, user=request.user)
+    except ProductCart.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-        serializer = ProductDetailSerializer(product)
-        return Response(serializer.data)
+        serializer = ProductCartSerializer(queryset)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
-        serializer = ProductDetailSerializer(request.data)
-        return Response(serializer.data)
+        serializer = ProductCartSerializer(queryset, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
-        product.delete()
+        queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    else:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
